@@ -25,12 +25,16 @@ class MindAgent {
                 contractABI,
                 wallet.connect(this.provider)
             );
-
-            // 转换proof格式
+    
+            // 修正：强制每个 proof 元素补齐到 32 字节
             const formattedProof = proof.map(p => {
-                return ethers.hexlify(ethers.stripZerosLeft(p));
+                // 移除可能的 "0x" 前缀
+                const hexValue = p.startsWith('0x') ? p.slice(2) : p;
+                // 补齐到 64 字符（32字节）
+                const paddedHex = hexValue.padStart(64, '0');
+                return `0x${paddedHex}`;
             });
-
+    
             return contract.claim.populateTransaction(
                 BigInt(amount),
                 formattedProof
